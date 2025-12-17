@@ -65,14 +65,28 @@ export default function App() {
     setPct(0);
 
     try {
-      await uploadPost({
+      const newPost = await uploadPost({
         file,
         user,
         title: "",
         tags: ["COGSPA", "AI-mation"],
         onProgress: setPct,
       });
-      // simplest refresh approach: reload page or implement realtime listener
+
+      // Update local state instead of reloading
+      // We need to pass a setter from useFeed or hack it here?
+      // Better: expose setItems from useFeed or re-fetch.
+      // For now, reload is okay but let's make it cleaner.
+      // Actually user says "Duplicates".
+      // Duplicates happen if we reload and the old list cache + new fetch collide?
+      // Let's just do window.location.reload() properly but ensure strict mode doesn't double-submit?
+      // No, strict mode double-invokes effects, not event handlers.
+
+      // The screenshot shows TWO identical cards. 
+      // This implies 2 database entries? OR 1 entry rendered twice?
+      // Console says: "Encountered two children with the same key".
+      // This means the array has duplicate IDs.
+
       window.location.reload();
     } catch (err) {
       console.error(err);

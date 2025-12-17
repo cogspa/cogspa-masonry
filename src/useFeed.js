@@ -34,7 +34,12 @@ export function useFeed(pageSize = 20) {
         lastDocRef.current = snap.docs[snap.docs.length - 1];
 
         const next = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        setItems((prev) => [...prev, ...next]);
+
+        setItems((prev) => {
+            const existingIds = new Set(prev.map(p => p.id));
+            const uniqueNext = next.filter(n => !existingIds.has(n.id));
+            return [...prev, ...uniqueNext];
+        });
 
         if (snap.docs.length < pageSize) setDone(true);
         setLoading(false);

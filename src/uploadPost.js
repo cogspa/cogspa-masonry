@@ -19,32 +19,48 @@ export async function uploadPost({ file, user, title, tags, onProgress }) {
         contentType: file.type,
     });
 
-    await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         task.on(
             "state_changed",
-            (snap) => {
-                const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-                onProgress?.(pct);
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log("Upload progress:", progress);
+                if (onProgress) onProgress(Math.round(progress));
             },
-            reject,
-            resolve
+            (error) => {
+                console.error("Storage Error:", error);
+                reject(error);
+            },
+            async () => {
+                console.log("Upload 100% complete. Getting download URL...");
+                try {
+                    const publicUrl = await getDownloadURL(task.snapshot.ref);
+                    console.log("Got URL:", publicUrl);
+
+                    // postId and type are already defined outside this promise
+                    // const postId = uniqueId; // Assuming uniqueId refers to the postId already generated
+                    // const type = file.type.startsWith("video") ? "video" : "image"; // type is already defined
+
+                    console.log("Saving to Firestore...");
+                    await setDoc(doc(db, "posts", postId), {
+                        ownerUid: user.uid,
+                        type,
+                        title: title?.trim() || file.name, // Use existing title logic
+                        tags: (tags || []).map((t) => t.trim()).filter(Boolean), // Use existing tags logic
+                        storagePath,
+                        publicUrl,
+                        createdAt: serverTimestamp(),
+                    });
+                    console.log("Firestore save complete!");
+
+                    resolve({ postId, publicUrl, type });
+                } catch (err) {
+                    console.error("Firestore Error:", err);
+                    reject(err);
+                }
+            }
         );
     });
-
-    const publicUrl = await getDownloadURL(storageRef);
-
-    const postDocRef = doc(collection(db, "posts"), postId);
-    await setDoc(postDocRef, {
-        ownerUid: user.uid,
-        type,
-        title: title?.trim() || file.name,
-        tags: (tags || []).map((t) => t.trim()).filter(Boolean),
-        storagePath,
-        publicUrl,
-        createdAt: serverTimestamp(),
-    });
-
-    return { postId, publicUrl, type };
 }
 
 export async function deletePost(post) {
