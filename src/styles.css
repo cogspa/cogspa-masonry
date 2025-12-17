@@ -222,7 +222,7 @@ body {
   border-color: rgba(255, 50, 50, .4);
 }
 
-:hover {
+.mini.danger:hover {
   background: rgba(255, 50, 50, .6);
 }
 
