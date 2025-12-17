@@ -61,6 +61,22 @@ export default function App() {
       return;
     }
 
+    // Ask for metadata
+    const defaultTags = "COGSPA, AI-mation";
+    const tagInput = prompt("Enter tags (comma separated):", defaultTags);
+    if (tagInput === null) {
+      e.target.value = ""; // clear input if cancelled
+      return;
+    }
+
+    const titleInput = prompt("Enter a title (optional):", "");
+    if (titleInput === null) {
+      e.target.value = "";
+      return;
+    }
+
+    const tags = tagInput.split(",").map(t => t.trim()).filter(Boolean);
+
     setUploading(true);
     setPct(0);
 
@@ -68,8 +84,8 @@ export default function App() {
       const newPost = await uploadPost({
         file,
         user,
-        title: "",
-        tags: ["COGSPA", "AI-mation"],
+        title: titleInput,
+        tags: tags.length ? tags : ["COGSPA"], // fallback
         onProgress: setPct,
       });
 
