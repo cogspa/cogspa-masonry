@@ -1,5 +1,6 @@
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { collection, doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
+import { collection, doc, serverTimestamp, setDoc, deleteDoc } from "firebase/firestore";
+
 import { db, storage } from "./firebase";
 
 export async function uploadPost({ file, user, title, tags, onProgress }) {
@@ -45,3 +46,17 @@ export async function uploadPost({ file, user, title, tags, onProgress }) {
 
     return { postId, publicUrl, type };
 }
+
+export async function deletePost(post) {
+    if (!post.id || !post.storagePath) throw new Error("Invalid post data");
+
+    // 1. Delete from Firestore
+    await deleteDoc(doc(db, "posts", post.id));
+
+    // 2. Delete from Storage
+    const storageRef = ref(storage, post.storagePath);
+    await deleteObject(storageRef).catch((err) => {
+        console.warn("Failed to delete media file (might not exist):", err);
+    });
+}
+

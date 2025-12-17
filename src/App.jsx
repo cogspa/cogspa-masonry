@@ -5,7 +5,7 @@ import { auth, googleProvider } from "./firebase";
 import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 
 import { useFeed } from "./useFeed";
-import { uploadPost } from "./uploadPost";
+import { uploadPost, deletePost } from "./uploadPost";
 
 const ADMIN_EMAIL = "jmicalle@gmail.com";
 
@@ -80,6 +80,17 @@ export default function App() {
     } finally {
       setUploading(false);
       e.target.value = "";
+    }
+  }
+
+  async function handleDelete(post) {
+    if (!confirm("Are you sure you want to delete this?")) return;
+    try {
+      await deletePost(post);
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete");
     }
   }
 
@@ -204,6 +215,15 @@ export default function App() {
               <div className="hoverBar">
                 <button className="mini">Save</button>
                 <button className="mini ghost">Share</button>
+                {canUpload && (
+                  <button
+                    className="mini danger"
+                    onClick={(e) => { e.preventDefault(); handleDelete(it); }}
+                    title="Delete"
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
             </article>
           ))}
