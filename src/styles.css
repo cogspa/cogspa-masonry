@@ -13,12 +13,17 @@
 body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;
-  background: var(--bg);
+  background: #050505;
+  /* Match river background */
   color: var(--text);
+  overflow-x: hidden;
+  /* Prevent horizontal scroll from river */
 }
 
 .page {
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
 }
 
 .topbar {

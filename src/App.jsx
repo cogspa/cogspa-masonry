@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { BackgroundRiver } from "./BackgroundRiver";
 import "./styles.css";
 
 import { auth, googleProvider } from "./firebase";
@@ -145,6 +146,7 @@ export default function App() {
 
   return (
     <div className="page">
+      <BackgroundRiver />
       <header className="topbar">
         <div className="brand">
           <div className="logo">C</div>
